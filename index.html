@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Verifica Validità Tessera</title>
+    <style>
+      body {
+          font-family: sans-serif;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          min-height: 100vh;
+          background-color: #f0f0f0;
+      }
+
+      .card {
+          background-color: white;
+          padding: 20px;
+          border-radius: 8px;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+          max-width: 400px;
+          width: 90%;
+      }
+
+      .card-content {
+          display: flex;
+          flex-direction: column;
+          gap: 15px;
+      }
+
+      h2 {
+          text-align: center;
+      }
+
+      input[type="text"] {
+          padding: 10px;
+          border: 1px solid #ccc;
+          border-radius: 4px;
+          width: calc(100% - 22px); /* Considera il padding e il bordo */
+          box-sizing: border-box; /* Include padding e border nella larghezza */
+      }
+
+      button {
+          padding: 10px 15px;
+          background-color: #007bff;
+          color: white;
+          border: none;
+          border-radius: 4px;
+          cursor: pointer;
+      }
+
+      button:disabled {
+          opacity: 0.6;
+          cursor: default;
+      }
+
+      .loader {
+          border: 4px solid #f3f3f3; /* Grigio chiaro */
+          border-top: 4px solid #3498db; /* Blu */
+          border-radius: 50%;
+          width: 20px;
+          height: 20px;
+          animation: spin 2s linear infinite;
+          margin: 0 auto; /* Centra il loader */
+      }
+
+      @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+      }
+
+      .result {
+          font-weight: bold;
+          margin-top: 10px;
+      }
+
+      .valid {
+          color: green;
+      }
+
+      .invalid {
+          color: red;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <div class="card-content">
+        <h2>Verifica Tessera</h2>
+        <input
+          type="text"
+          id="cardNumber"
+          placeholder="Inserisci il numero di tessera" />
+        <input
+          type="text"
+          id="fiscalCode"
+          placeholder="Inserisci il codice fiscale" />
+        <button id="checkButton">Verifica</button>
+        <div id="result" class="result"></div>
+      </div>
+    </div>
+
+    <script>
+      const SPREADSHEET_ID = "12K5ezLcduHwponZG2NsXcmyAZacYB1W5gwnFWrjDRZc"; // Sostituisci con il tuo ID
+      const API_KEY = "AIzaSyBwE8y4mnpen8beEeuWndF_Bm1GE0YhoJU"; // Sostituisci con la tua API Key
+      const CARD_RANGE = "'Libro Soci'!R:R";
+      const CF_RANGE = "'Libro Soci'!H:H";
+
+      const cardNumberInput = document.getElementById("cardNumber");
+      const fiscalCodeInput = document.getElementById("fiscalCode");
+      const checkButton = document.getElementById("checkButton");
+      const resultDiv = document.getElementById("result");
+
+      checkButton.addEventListener("click", checkCardValidity);
+
+      async function checkCardValidity() {
+        const cardNumber = cardNumberInput.value;
+        const fiscalCode = fiscalCodeInput.value.toUpperCase(); // Converti in maiuscolo
+
+        if (!cardNumber || !fiscalCode) {
+          resultDiv.textContent =
+            "Inserisci sia il numero di tessera che il codice fiscale.";
+          resultDiv.className = "result invalid";
+          return;
+        }
+
+        checkButton.disabled = true;
+        checkButton.textContent = ""; // Svuota il testo del bottone
+        const loader = document.createElement("div");
+        loader.className = "loader";
+        checkButton.appendChild(loader);
+
+        try {
+          const response = await fetch(
+            `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${CARD_RANGE}?key=${API_KEY}`
+          );
+          const cfResponse = await fetch(
+            `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${CF_RANGE}?key=${API_KEY}`
+          );
+
+          const data = await response.json();
+          const cfData = await cfResponse.json();
+
+          const validCards = data.values ? data.values.flat() : [];
+          const validCFs = cfData.values ? cfData.values.flat() : [];
+
+          const isValid =
+            validCards.includes(cardNumber) && validCFs.includes(fiscalCode);
+
+          resultDiv.textContent = isValid
+            ? "Tessera valida!"
+            : "Tessera o codice fiscale non trovati.";
+          resultDiv.className = isValid ? "result valid" : "result invalid";
+        } catch (error) {
+          console.error("Errore durante il controllo della tessera", error);
+          resultDiv.textContent = "Errore durante la verifica.";
+          resultDiv.className = "result invalid";
+        } finally {
+          checkButton.disabled = false;
+          checkButton.textContent = "Verifica"; // Ripristina il testo del bottone
+          checkButton.removeChild(loader); // Rimuovi il loader
+        }
+      }
+    </script>
+  </body>
+</html>
