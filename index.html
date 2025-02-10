@@ -6,81 +6,85 @@
     <title>Verifica Validità Tessera</title>
     <style>
       body {
-          font-family: sans-serif;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          min-height: 100vh;
-          background-color: #f0f0f0;
+        font-family: sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        background-color: #f0f0f0;
       }
 
       .card {
-          background-color: white;
-          padding: 20px;
-          border-radius: 8px;
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-          max-width: 400px;
-          width: 90%;
+        background-color: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        max-width: 400px;
+        width: 90%;
       }
 
       .card-content {
-          display: flex;
-          flex-direction: column;
-          gap: 15px;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
       }
 
       h2 {
-          text-align: center;
+        text-align: center;
       }
 
       input[type="text"] {
-          padding: 10px;
-          border: 1px solid #ccc;
-          border-radius: 4px;
-          width: calc(100% - 22px); /* Considera il padding e il bordo */
-          box-sizing: border-box; /* Include padding e border nella larghezza */
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        width: calc(100% - 22px); /* Considera il padding e il bordo */
+        box-sizing: border-box; /* Include padding e border nella larghezza */
       }
 
       button {
-          padding: 10px 15px;
-          background-color: #007bff;
-          color: white;
-          border: none;
-          border-radius: 4px;
-          cursor: pointer;
+        padding: 10px 15px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
       }
 
       button:disabled {
-          opacity: 0.6;
-          cursor: default;
+        opacity: 0.6;
+        cursor: default;
       }
 
       .loader {
-          border: 4px solid #f3f3f3; /* Grigio chiaro */
-          border-top: 4px solid #3498db; /* Blu */
-          border-radius: 50%;
-          width: 20px;
-          height: 20px;
-          animation: spin 2s linear infinite;
-          margin: 0 auto; /* Centra il loader */
+        border: 4px solid #f3f3f3; /* Grigio chiaro */
+        border-top: 4px solid #3498db; /* Blu */
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        animation: spin 2s linear infinite;
+        margin: 0 auto; /* Centra il loader */
       }
 
       @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
       }
 
       .result {
-          font-weight: bold;
-          margin-top: 10px;
+        font-weight: bold;
+        margin-top: 10px;
       }
 
       .valid {
-          color: green;
+        color: green;
       }
 
       .invalid {
-          color: red;
+        color: red;
       }
     </style>
   </head>
@@ -95,8 +99,9 @@
         <input
           type="text"
           id="fiscalCode"
-          placeholder="Inserisci il codice fiscale" />
-        <button id="checkButton">Verifica</button>
+          placeholder="Inserisci il codice fiscale"
+          style="text-transform: uppercase" />
+        <button id="checkButton">Verifica validità</button>
         <div id="result" class="result"></div>
       </div>
     </div>
