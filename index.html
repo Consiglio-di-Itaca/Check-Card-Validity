@@ -6,7 +6,10 @@
     <title>Verifica Tessera</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="flex justify-center items-center min-h-screen bg-[#7A1414]">
+<body class="flex flex-col justify-center items-center min-h-screen bg-[#7A1414] p-4">
+    <div class="w-36 h-36 bg-white rounded-full flex justify-center items-center mb-4">
+        <img src="https://links.consigliodiitaca.it/assets/img/logo_square.png" alt="Logo Il Consiglio di Itaca" class="w-24">
+    </div>
     <div class="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
         <h2 class="text-xl font-bold text-center mb-4 text-[#7A1414]">Verifica Tessera</h2>
         <input type="text" id="cardNumber" placeholder="Inserisci il numero di tessera"
@@ -17,7 +20,6 @@
             class="w-full bg-[#F4C430] text-black p-2 rounded hover:bg-[#d4a700]">
             Verifica
         </button>
-        <p id="resultMessage" class="text-center font-semibold mt-3"></p>
     </div>
 
     <script>
@@ -28,13 +30,16 @@
 
         async function checkCardValidity() {
             const cardNumber = document.getElementById("cardNumber").value.trim();
-            const fiscalCode = document.getElementById("fiscalCode").value.trim(); // Maiuscolo automatico tramite oninput
-            const resultMessage = document.getElementById("resultMessage");
+            const fiscalCode = document.getElementById("fiscalCode").value.trim(); 
             const verifyButton = document.getElementById("verifyButton");
 
             if (!cardNumber || !fiscalCode) {
-                resultMessage.textContent = "Compila entrambi i campi.";
-                resultMessage.className = "text-center text-red-500 font-semibold";
+                verifyButton.innerHTML = "Compila entrambi i campi";
+                verifyButton.classList.add("bg-red-500", "text-white");
+                setTimeout(() => {
+                    verifyButton.innerHTML = "Verifica";
+                    verifyButton.classList.remove("bg-red-500", "text-white");
+                }, 2000);
                 return;
             }
 
@@ -55,16 +60,21 @@
 
                 const isValid = validCards.includes(cardNumber) && validCFs.includes(fiscalCode);
 
-                resultMessage.textContent = isValid ? "Tessera valida!" : "Tessera o codice fiscale non trovati.";
-                resultMessage.className = `text-center font-semibold ${isValid ? "text-green-500" : "text-red-500"}`;
+                verifyButton.innerHTML = isValid ? "Tessera Validata!" : "Tessera non trovata";
+                verifyButton.classList.toggle("bg-green-500", isValid);
+                verifyButton.classList.toggle("bg-red-500", !isValid);
+                verifyButton.classList.toggle("text-white", true);
             } catch (error) {
-                resultMessage.textContent = "Errore nella verifica.";
-                resultMessage.className = "text-center text-red-500 font-semibold";
+                verifyButton.innerHTML = "Errore verifica";
+                verifyButton.classList.add("bg-red-500", "text-white");
                 console.error("Errore:", error);
             }
 
-            verifyButton.innerHTML = "Verifica";
-            verifyButton.disabled = false;
+            setTimeout(() => {
+                verifyButton.innerHTML = "Verifica";
+                verifyButton.classList.remove("bg-green-500", "bg-red-500", "text-white");
+                verifyButton.disabled = false;
+            }, 3000);
         }
     </script>
 </body>
