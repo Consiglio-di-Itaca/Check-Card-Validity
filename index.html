@@ -22,6 +22,10 @@
             <span id="buttonText">Verifica</span>
             <span id="loadingSpinner" class="hidden ml-2 border-2 border-white border-t-transparent rounded-full w-4 h-4 animate-spin"></span>
         </button>
+        <div id="userInfo" class="mt-4 hidden p-4 bg-gray-100 rounded">
+            <p><strong>Nome:</strong> <span id="userName"></span></p>
+            <p><strong>Data Sottoscrizione:</strong> <span id="subscriptionDate"></span></p>
+        </div>
     </div>
 
     <script>
@@ -29,6 +33,8 @@
         const API_KEY = "AIzaSyBwE8y4mnpen8beEeuWndF_Bm1GE0YhoJU";
         const CARD_RANGE = "'Libro Soci'!R:R"; 
         const CF_RANGE = "'Libro Soci'!H:H"; 
+        const NAME_RANGE = "'Libro Soci'!B:B";
+        const DATE_RANGE = "'Libro Soci'!C:C";
 
         document.addEventListener("DOMContentLoaded", () => {
             document.getElementById("cardNumber").value = localStorage.getItem("cardNumber") || "";
@@ -47,6 +53,9 @@
             const buttonText = document.getElementById("buttonText");
             const loadingSpinner = document.getElementById("loadingSpinner");
             const errorMessage = document.getElementById("errorMessage");
+            const userInfo = document.getElementById("userInfo");
+            const userName = document.getElementById("userName");
+            const subscriptionDate = document.getElementById("subscriptionDate");
 
             if (!cardNumber || !fiscalCode) {
                 errorMessage.innerText = "Compila entrambi i campi";
@@ -60,23 +69,37 @@
             verifyButton.disabled = true;
 
             try {
-                const [cardRes, cfRes] = await Promise.all([
+                const [cardRes, cfRes, nameRes, dateRes] = await Promise.all([
                     fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${CARD_RANGE}?key=${API_KEY}`),
-                    fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${CF_RANGE}?key=${API_KEY}`)
+                    fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${CF_RANGE}?key=${API_KEY}`),
+                    fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${NAME_RANGE}?key=${API_KEY}`),
+                    fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${DATE_RANGE}?key=${API_KEY}`)
                 ]);
 
                 const cardData = await cardRes.json();
                 const cfData = await cfRes.json();
+                const nameData = await nameRes.json();
+                const dateData = await dateRes.json();
 
                 const validCards = cardData.values ? cardData.values.flat() : [];
                 const validCFs = cfData.values ? cfData.values.flat() : [];
+                const names = nameData.values ? nameData.values.flat() : [];
+                const dates = dateData.values ? dateData.values.flat() : [];
 
-                const isValid = validCards.includes(cardNumber) && validCFs.includes(fiscalCode);
+                const index = validCards.indexOf(cardNumber);
+                const isValid = index !== -1 && validCFs[index] === fiscalCode;
 
-                buttonText.innerText = isValid ? "Tessera Validata!" : "Tessera non trovata";
-                verifyButton.classList.toggle("bg-green-500", isValid);
-                verifyButton.classList.toggle("bg-red-500", !isValid);
-                verifyButton.classList.toggle("text-white", true);
+                if (isValid) {
+                    buttonText.innerText = "Tessera Validata!";
+                    verifyButton.classList.add("bg-green-500", "text-white");
+                    userName.innerText = names[index] || "Non disponibile";
+                    subscriptionDate.innerText = dates[index] || "Non disponibile";
+                    userInfo.classList.remove("hidden");
+                } else {
+                    buttonText.innerText = "Tessera non trovata";
+                    verifyButton.classList.add("bg-red-500", "text-white");
+                    userInfo.classList.add("hidden");
+                }
             } catch (error) {
                 buttonText.innerText = "Errore verifica";
                 verifyButton.classList.add("bg-red-500", "text-white");
