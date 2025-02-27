@@ -33,8 +33,9 @@
         const API_KEY = "AIzaSyBwE8y4mnpen8beEeuWndF_Bm1GE0YhoJU";
         const CARD_RANGE = "'Libro Soci'!R:R"; 
         const CF_RANGE = "'Libro Soci'!H:H"; 
-        const NAME_RANGE = "'Libro Soci'!B:B";
-        const DATE_RANGE = "'Libro Soci'!C:C";
+        const NAME_RANGE = "'Libro Soci'!A:A";
+        const SURNAME_RANGE = "'Libro Soci'!B:B";
+        const DATE_RANGE = "'Libro Soci'!Q:Q";
 
         document.addEventListener("DOMContentLoaded", () => {
             document.getElementById("cardNumber").value = localStorage.getItem("cardNumber") || "";
@@ -69,21 +70,24 @@
             verifyButton.disabled = true;
 
             try {
-                const [cardRes, cfRes, nameRes, dateRes] = await Promise.all([
+                const [cardRes, cfRes, nameRes, surnameRes, dateRes] = await Promise.all([
                     fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${CARD_RANGE}?key=${API_KEY}`),
                     fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${CF_RANGE}?key=${API_KEY}`),
                     fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${NAME_RANGE}?key=${API_KEY}`),
+                    fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${SURNAME_RANGE}?key=${API_KEY}`),
                     fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${DATE_RANGE}?key=${API_KEY}`)
                 ]);
 
                 const cardData = await cardRes.json();
                 const cfData = await cfRes.json();
                 const nameData = await nameRes.json();
+                const surnameData = await surnameRes.json();
                 const dateData = await dateRes.json();
 
                 const validCards = cardData.values ? cardData.values.flat() : [];
                 const validCFs = cfData.values ? cfData.values.flat() : [];
                 const names = nameData.values ? nameData.values.flat() : [];
+                const surnames = surnameData.values ? surnameData.values.flat() : [];
                 const dates = dateData.values ? dateData.values.flat() : [];
 
                 const index = validCards.indexOf(cardNumber);
@@ -92,7 +96,7 @@
                 if (isValid) {
                     buttonText.innerText = "Tessera Validata!";
                     verifyButton.classList.add("bg-green-500", "text-white");
-                    userName.innerText = names[index] || "Non disponibile";
+                    userName.innerText = `${names[index] || ""} ${surnames[index] || ""}`.trim();
                     subscriptionDate.innerText = dates[index] || "Non disponibile";
                     userInfo.classList.remove("hidden");
                 } else {
